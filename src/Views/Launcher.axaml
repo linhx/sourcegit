@@ -11,8 +11,11 @@
                     x:Name="ThisControl"
                     Icon="/App.ico"
                     Title="{Binding Title}"
+                    DragDrop.AllowDrop="True"
+                    DragDrop.DragOver="OnDragOver"
+                    DragDrop.Drop="OnDrop"
                     MinWidth="1024" MinHeight="600">
-  <Grid>
+  <Grid DragDrop.AllowDrop="True">
     <Grid.RowDefinitions>
       <RowDefinition Height="{Binding #ThisControl.CaptionHeight}"/>
       <RowDefinition Height="*"/>

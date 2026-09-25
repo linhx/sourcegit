@@ -447,6 +447,35 @@ namespace SourceGit.Views
             e.Handled = true;
         }
 
+        private void OnDragOver(object sender, DragEventArgs e)
+        {
+            if (e.DataTransfer.Contains(DataFormat.File))
+            {
+                e.DragEffects = DragDropEffects.Copy | DragDropEffects.Move;
+                e.Handled = true;
+            }
+            else
+            {
+                e.DragEffects = DragDropEffects.None;
+                e.Handled = true;
+            }
+        }
+
+        private async void OnDrop(object sender, DragEventArgs e)
+        {
+            if (e.DataTransfer.Contains(DataFormat.File) && DataContext is ViewModels.Launcher vm)
+            {
+                e.Handled = true;
+
+                var items = e.DataTransfer.TryGetFiles() ?? [];
+                foreach (var item in items)
+                {
+                    if (item.Path != null)
+                        await vm.OpenRepositoryFromDropAsync(item.Path.LocalPath);
+                }
+            }
+        }
+
         private GridLength _captionHeight = new(32);
         private WindowState _lastWindowState = WindowState.Normal;
     }

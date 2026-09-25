@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 using Avalonia.Collections;
 using Avalonia.Threading;
@@ -299,11 +300,38 @@ namespace SourceGit.ViewModels
             OpenRepositoryInTab(node, null);
         }
 
-        public void OpenRepositoryInTab(RepositoryNode node, LauncherPage page)
+        public async Task<bool> OpenRepositoryFromDropAsync(string path)
         {
+            var root = await Welcome.Instance.GetRepositoryRootAsync(path);
+            if (string.IsNullOrEmpty(root))
+                return false;
+
+            var normalizedPath = root.Replace('\\', '/').TrimEnd('/');
+            var comparison = OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
             foreach (var one in Pages)
             {
-                if (one.Node.Id == node.Id)
+                if (one.Node.Id.Equals(normalizedPath, comparison) ||
+                    (one.Data is Repository r && r.FullPath.Equals(normalizedPath, comparison)))
+                {
+                    ActivePage = one;
+                    return true;
+                }
+            }
+
+            var node = Preferences.Instance.FindOrAddNodeByRepositoryPath(normalizedPath, null, false);
+            Welcome.Instance.Refresh();
+            OpenRepositoryInTab(node, null);
+            return true;
+        }
+
+        public void OpenRepositoryInTab(RepositoryNode node, LauncherPage page)
+        {
+            var comparison = OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            foreach (var one in Pages)
+            {
+                if (one.Node.Id.Equals(node.Id, comparison) ||
+                    (one.Data is Repository r && r.FullPath.Equals(node.Id, comparison)))
                 {
                     ActivePage = one;
                     return;

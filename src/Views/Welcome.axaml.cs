@@ -308,7 +308,7 @@ namespace SourceGit.Views
         {
             if (e.DataTransfer.Contains(DataFormat.File) || e.DataTransfer.Contains(_dndRepoNode))
             {
-                e.DragEffects = DragDropEffects.Move;
+                e.DragEffects = DragDropEffects.Copy | DragDropEffects.Move;
                 e.Handled = true;
             }
             else
@@ -331,20 +331,13 @@ namespace SourceGit.Views
                 e.Handled = true;
 
                 var items = e.DataTransfer.TryGetFiles() ?? [];
-                var refresh = false;
+                var launcher = App.GetLauncher();
 
                 foreach (var item in items)
                 {
-                    var path = await ViewModels.Welcome.Instance.GetRepositoryRootAsync(item.Path.LocalPath);
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        await ViewModels.Welcome.Instance.AddRepositoryAsync(path, null, true, false);
-                        refresh = true;
-                    }
+                    if (item.Path != null && launcher != null)
+                        await launcher.OpenRepositoryFromDropAsync(item.Path.LocalPath);
                 }
-
-                if (refresh)
-                    ViewModels.Welcome.Instance.Refresh();
             }
 
             _pressTreeNodeEvent = null;
@@ -358,7 +351,7 @@ namespace SourceGit.Views
                 if (sender is not Grid { DataContext: ViewModels.RepositoryNode })
                     return;
 
-                e.DragEffects = DragDropEffects.Move;
+                e.DragEffects = DragDropEffects.Copy | DragDropEffects.Move;
                 e.Handled = true;
             }
         }
@@ -397,7 +390,7 @@ namespace SourceGit.Views
                     var path = await ViewModels.Welcome.Instance.GetRepositoryRootAsync(item.Path.LocalPath);
                     if (!string.IsNullOrEmpty(path))
                     {
-                        await ViewModels.Welcome.Instance.AddRepositoryAsync(path, to, true, false);
+                        await ViewModels.Welcome.Instance.AddRepositoryAsync(path, to, true, true);
                         refresh = true;
                     }
                 }

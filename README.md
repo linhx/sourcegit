@@ -305,3 +305,4 @@ The script will read the base language file (`en_US.axaml`) and the target langu
 ## Third-Party Components
 
 For detailed license information, see [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+
